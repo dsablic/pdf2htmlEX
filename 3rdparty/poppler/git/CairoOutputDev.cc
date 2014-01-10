@@ -2911,8 +2911,8 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 
   cairo_pattern_set_filter (pattern, filter);
 
-  if (!printing)
-    cairo_pattern_set_extend (pattern, CAIRO_EXTEND_PAD);
+  //if (!printing)
+    //cairo_pattern_set_extend (pattern, CAIRO_EXTEND_PAD);
 
   cairo_matrix_init_translate (&matrix, 0, height);
   cairo_matrix_scale (&matrix, width, -height);
@@ -2940,10 +2940,10 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     cairo_set_matrix (cairo, &mask_matrix);
     cairo_mask (cairo, maskPattern);
   } else {
-    if (printing)
+    //if (printing)
       cairo_paint (cairo);
-    else
-      cairo_fill (cairo);
+    //else
+      //cairo_fill (cairo);
   }
   cairo_restore (cairo);
 
