@@ -1,14 +1,21 @@
-Developing v0.11
+Developing v0.12
+
+v0.11
+2014.01.19
 
 * Compress JS with closure-compiler
 * Compress CSS with YUI Compressor
-* Remove jQuery
+* jQuery removed
 * Lots of JS code cleaning
 * Enable global key handler by default
 * Use WOFF by default
 * Always generate TTF before the final output
 * Fix CSS for loading-indicator
 * Do not set style for global <span>
+* Improvements on the SVG output
+* New options
+ --tmp-file-size-limit
+ --tmp-dir
 
 v0.10
 2013.10.17
