@@ -24,7 +24,7 @@ pdf2htmlEX is best for text-based PDF files, for example scientific papers with 
 Text, fonts and formats are natively preserved in HTML such that you can still search and copy.
 The generated HTML file is static, with optional features powered by JavaScript.
 
-[Learn more about who and why should use pdf2htmlEX](https://github.com/coolwanglu/pdf2htmlEX/wiki/Introduction)
+Learn more about [who](https://github.com/coolwanglu/pdf2htmlEX/wiki/Use-Cases) and [why](https://github.com/coolwanglu/pdf2htmlEX/wiki/Introduction) should use pdf2htmlEX.
 
 ### Features
 
@@ -32,7 +32,7 @@ The generated HTML file is static, with optional features powered by JavaScript.
 * Flexible Output
 * Moderate Size
 * More PDF stuffs that you love: links, outlines & printing
-* Experimental: SVG background output & Type 3 font conversion
+* SVG background output & Type 3 font conversion
 
 [Learn more](https://github.com/coolwanglu/pdf2htmlEX/wiki/Feature-List)   
 [Compare with others](https://github.com/coolwanglu/pdf2htmlEX/wiki/Comparison)
