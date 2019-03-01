@@ -135,6 +135,7 @@ bool CairoBackgroundRenderer::render_page(PDFDoc * doc, int pageno)
 
     cairo_t * cr = cairo_create(surface);
     setCairo(cr);
+    setPrinting(false);
 
     bitmaps_in_current_page.clear();
 

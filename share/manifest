@@ -39,7 +39,7 @@ $css
 
 # compatibility.min.js, extracted from PDF.js
 # To support old browsers like IE9
-@compatibility.min.js
+# @compatibility.min.js
 
 # entry point of pdf2htmlEX.Viewer
 # You can override default configuration by passing an object to the constructor of Viewer
