@@ -56,7 +56,7 @@ void show_usage_and_exit(const char * dummy = nullptr)
 void show_version_and_exit(const char * dummy = nullptr)
 {
     cerr << "pdf2htmlEX version " << PDF2HTMLEX_VERSION << endl;
-    cerr << "Copyright 2012-2014 Lu Wang <coolwanglu@gmail.com> and other contributers" << endl;
+    cerr << "Copyright 2012-2014 Lu Wang <coolwanglu@gmail.com> and other contributors" << endl;
     cerr << "Libraries: " << endl;
     cerr << "  poppler " << POPPLER_VERSION << endl;
     cerr << "  libfontforge " << ffw_get_version() << endl;
@@ -159,7 +159,7 @@ void parse_options (int argc, char **argv)
         .add("split-pages", &param.split_pages, 0, "split pages into separate files")
         .add("dest-dir", &param.dest_dir, ".", "specify destination directory")
         .add("css-filename", &param.css_filename, "", "filename of the generated css file")
-        .add("page-filename", &param.page_filename, "", "filename template for splitted pages ")
+        .add("page-filename", &param.page_filename, "", "filename template for split pages ")
         .add("outline-filename", &param.outline_filename, "", "filename of the generated outline file")
         .add("process-nontext", &param.process_nontext, 1, "render graphics in addition to text")
         .add("process-outline", &param.process_outline, 1, "show outline in HTML")
@@ -187,9 +187,13 @@ void parse_options (int argc, char **argv)
         .add("space-as-offset", &param.space_as_offset, 0, "treat space characters as offsets")
         .add("tounicode", &param.tounicode, 0, "how to handle ToUnicode CMaps (0=auto, 1=force, -1=ignore)")
         .add("optimize-text", &param.optimize_text, 0, "try to reduce the number of HTML elements used for text")
+        .add("correct-text-visibility", &param.correct_text_visibility, 0, "try to detect texts covered by other graphics and properly arrange them")
 
         // background image
         .add("bg-format", &param.bg_format, "png", "specify background image format")
+        .add("svg-node-count-limit", &param.svg_node_count_limit, -1, "if node count in a svg background image exceeds this limit,"
+                " fall back this page to bitmap background; negative value means no limit.")
+        .add("svg-embed-bitmap", &param.svg_embed_bitmap, 1, "1: embed bitmaps in svg background; 0: dump bitmaps to external files if possible.")
 
         // encryption
         .add("owner-password,o", &param.owner_password, "", "owner password (for encrypted files)", true)
@@ -198,17 +202,14 @@ void parse_options (int argc, char **argv)
 
         // misc.
         .add("clean-tmp", &param.clean_tmp, 1, "remove temporary files after conversion")
-        .add("tmp-dir", &param.tmp_dir, param.tmp_dir, "specify the location of tempory directory.")
+        .add("tmp-dir", &param.tmp_dir, param.tmp_dir, "specify the location of temporary directory.")
         .add("data-dir", &param.data_dir, param.data_dir, "specify data directory")
-        // TODO: css drawings are hidden on print, for annot links, need to fix it for other drawings
-//        .add("css-draw", &param.css_draw, 0, "[experimental and unsupported] CSS drawing")
         .add("debug", &param.debug, 0, "print debugging information")
+        .add("proof", &param.proof, 0, "texts are drawn on both text layer and background for proof.")
 
         // meta
         .add("version,v", "print copyright and version info", &show_version_and_exit)
         .add("help,h", "print usage information", &show_usage_and_exit)
-
-        // deprecated
 
         .add("", &param.input_filename, "", "")
         .add("", &param.output_filename, "", "")
@@ -352,7 +353,18 @@ int main(int argc, char **argv)
     param.data_dir = get_exec_dir(argv[0]);
     param.tmp_dir  = get_tmp_dir();
 #else
-    param.tmp_dir = "/tmp";
+    char const* tmp = getenv("TMPDIR");
+#ifdef P_tmpdir
+    if (!tmp)
+        tmp = P_tmpdir;
+#endif
+#ifdef _PATH_TMP
+    if (!tmp)
+        tmp = _PATH_TMP;
+#endif
+    if (!tmp)
+        tmp = "/tmp";
+    param.tmp_dir = string(tmp);
     param.data_dir = PDF2HTMLEX_DATA_PATH;
 #endif
 

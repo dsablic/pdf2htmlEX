@@ -31,9 +31,12 @@
 #include "HTMLTextPage.h"
 
 #include "BackgroundRenderer/BackgroundRenderer.h"
+#include "CoveredTextDetector.h"
+#include "DrawingTracer.h"
 
 #include "util/const.h"
 #include "util/misc.h"
+
 
 namespace pdf2htmlEX {
 
@@ -89,7 +92,9 @@ public:
      * We just mark as changed, and recheck if they have been changed when we are about to output a new string
      */
 
-    virtual void restoreState(GfxState * state) { updateAll(state); }
+    virtual void restoreState(GfxState * state);
+
+    virtual void saveState(GfxState *state);
 
     virtual void updateAll(GfxState * state);
 
@@ -125,15 +130,30 @@ public:
 
     virtual void drawImage(GfxState * state, Object * ref, Stream * str, int width, int height, GfxImageColorMap * colorMap, GBool interpolate, int *maskColors, GBool inlineImg);
 
-    virtual void stroke(GfxState *state) { css_do_path(state, false); }
-    virtual void fill(GfxState *state) { css_do_path(state, true); }
+    virtual void drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str,
+                       int width, int height,
+                       GfxImageColorMap *colorMap,
+                       GBool interpolate,
+                       Stream *maskStr,
+                       int maskWidth, int maskHeight,
+                       GfxImageColorMap *maskColorMap,
+                       GBool maskInterpolate);
+
+    virtual void stroke(GfxState *state); 
+    virtual void fill(GfxState *state);
+    virtual void eoFill(GfxState *state);
     virtual GBool axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax);
 
     virtual void processLink(AnnotLink * al);
 
-    /* capacity test */
-    bool can_stroke(GfxState *state) { return css_do_path(state, false, true); }
-    bool can_fill(GfxState *state) { return css_do_path(state, true, true); }
+    /*
+     * Covered text handling.
+     */
+    // Is a char (actually a glyph) covered by non-char's. Index in drawing order in current page.
+    // Does not fail on out-of-bound conditions, but return false.
+    bool is_char_covered(int index);
+    // Currently drawn char (glyph) count in current page.
+    int get_char_count() { return (int)covered_text_detecor.get_chars_covered().size(); }
 
 protected:
     ////////////////////////////////////////////////////
@@ -188,33 +208,12 @@ protected:
     void reset_state();
     // reset all ***_changed flags
     void reset_state_change();
-    // check updated states, and determine new_line_stauts
+    // check updated states, and determine new_line_status
     // make sure this function can be called several times consecutively without problem
     void check_state_change(GfxState * state);
     // prepare the line context, (close old tags, open new tags)
     // make sure the current HTML style consistent with PDF
     void prepare_text_line(GfxState * state);
-
-    ////////////////////////////////////////////////////
-    // CSS drawing
-    ////////////////////////////////////////////////////
-    /*
-     * test_only is for capacity check
-     */
-    bool css_do_path(GfxState *state, bool fill, bool test_only = false);
-    /*
-     * coordinates are to transformed by state->getCTM()
-     * (x,y) should be the bottom-left corner INCLUDING border
-     * w,h should be the metrics WITHOUT border
-     *
-     * line_color & fill_color may be specified as nullptr to indicate none
-     * style_function & style_function_data may be provided to provide more styles
-     */
-    void css_draw_rectangle(double x, double y, double w, double h, const double * tm,
-            double * line_width_array, int line_width_count,
-            const GfxRGB * line_color, const GfxRGB * fill_color, 
-            void (*style_function)(void *, std::ostream &) = nullptr, void * style_function_data = nullptr );
-
 
     ////////////////////////////////////////////////////
     // PDF stuffs
@@ -327,7 +326,7 @@ protected:
     friend class CairoBackgroundRenderer; // ugly!
 #endif
     BackgroundRenderer * bg_renderer;
-
+    BackgroundRenderer * fallback_bg_renderer;
 
     struct {
         std::ofstream fs;
@@ -337,6 +336,9 @@ protected:
     std::string cur_page_filename;
 
     static const std::string MANIFEST_FILENAME;
+
+    CoveredTextDetector covered_text_detecor;
+    DrawingTracer tracer;
 };
 
 } //namespace pdf2htmlEX

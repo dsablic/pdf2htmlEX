@@ -26,17 +26,13 @@ class SplashBackgroundRenderer : public BackgroundRenderer, SplashOutputDev
 {
 public:
   static const SplashColor white;
-
-  SplashBackgroundRenderer(HTMLRenderer * html_renderer, const Param & param)
-      : SplashOutputDev(splashModeRGB8, 4, gFalse, (SplashColorPtr)(&white), gTrue, gTrue)
-      , html_renderer(html_renderer)
-      , param(param)
-  { }
+  //format: "png" or "jpg", or "" for a default format
+  SplashBackgroundRenderer(const std::string & format, HTMLRenderer * html_renderer, const Param & param);
 
   virtual ~SplashBackgroundRenderer() { }
 
   virtual void init(PDFDoc * doc);
-  virtual void render_page(PDFDoc * doc, int pageno);
+  virtual bool render_page(PDFDoc * doc, int pageno);
   virtual void embed_image(int pageno);
 
   // Does this device use beginType3Char/endType3Char?  Otherwise,
@@ -54,20 +50,18 @@ public:
       double originX, double originY,
       CharCode code, int nBytes, Unicode *u, int uLen);
 
-  virtual void stroke(GfxState *state) {
-      if(!html_renderer->can_stroke(state))
-          SplashOutputDev::stroke(state);
-  }
-
-  virtual void fill(GfxState *state) { 
-      if(!html_renderer->can_fill(state))
-          SplashOutputDev::fill(state);
-  }
+  //for proof
+  void beginTextObject(GfxState *state);
+  void beginString(GfxState *state, GooString * str);
+  void endTextObject(GfxState *state);
+  void updateRender(GfxState *state);
 
 protected:
   void dump_image(const char * filename, int x1, int y1, int x2, int y2);
   HTMLRenderer * html_renderer;
   const Param & param;
+  std::string format;
+  int drawn_char_count;
 };
 
 } // namespace pdf2htmlEX
